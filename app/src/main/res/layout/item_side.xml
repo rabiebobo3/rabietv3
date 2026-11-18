@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:paddingTop="3dp" android:paddingBottom="3dp">
+    <LinearLayout android:id="@+id/card" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/card" android:padding="9dp" android:focusable="true">
+        <ImageView android:id="@+id/imgLogo" android:layout_width="40dp" android:layout_height="40dp"
+            android:scaleType="fitCenter" android:contentDescription="logo"/>
+        <TextView android:id="@+id/tvName" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:textColor="@color/text" android:textSize="14sp"
+            android:singleLine="true" android:layout_marginStart="10dp"/>
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:paddingTop="5dp" android:paddingBottom="5dp">
+    <LinearLayout android:id="@+id/card" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical"
+        android:background="@drawable/card" android:padding="12dp" android:focusable="true">
+        <ImageView android:id="@+id/imgLogo" android:layout_width="54dp" android:layout_height="54dp"
+            android:scaleType="fitCenter" android:contentDescription="logo"/>
+        <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+            android:orientation="vertical" android:layout_marginStart="14dp">
+            <TextView android:id="@+id/tvName" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/text" android:textSize="16sp" android:singleLine="true"/>
+            <TextView android:id="@+id/tvGroup" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/textDim" android:textSize="12sp" android:singleLine="true"
+                android:layout_marginTop="3dp"/>
+        </LinearLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="▶" android:textColor="@color/gold" android:textSize="20sp" android:paddingStart="10dp"/>
+    </LinearLayout>
+</FrameLayout>

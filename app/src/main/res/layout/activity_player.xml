@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#000000" android:keepScreenOn="true">
+    <androidx.media3.ui.PlayerView android:id="@+id/pv" app:use_controller="false"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="#000000"/>
+    <!-- بطاقة اللوقو: تغطي منطقة الفيديو فقط حتى يأتي البث (لا سواد) -->
+    <FrameLayout android:id="@+id/logoCard" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:background="@color/bg" android:visibility="gone">
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center" android:orientation="vertical" android:gravity="center">
+            <ImageView android:id="@+id/imgCardLogo" android:layout_width="190dp" android:layout_height="190dp"
+                android:scaleType="fitCenter" android:contentDescription="logo"/>
+            <TextView android:id="@+id/tvCardName" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/gold" android:textSize="20sp" android:textStyle="bold"
+                android:layout_marginTop="18dp"/>
+            <ProgressBar android:layout_width="42dp" android:layout_height="42dp"
+                android:indeterminateTint="@color/gold" android:layout_marginTop="20dp"/>
+        </LinearLayout>
+    </FrameLayout>
+    <!-- القائمة الجانبية: تبديل القنوات داخل المشغل -->
+    <LinearLayout android:id="@+id/sidePanel" android:layout_width="330dp" android:layout_height="match_parent"
+        android:layout_gravity="end" android:orientation="vertical" android:background="#E806080F"
+        android:visibility="gone">
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="القنوات" android:textColor="@color/gold" android:textSize="18sp" android:textStyle="bold"
+            android:padding="14dp"/>
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvSide"
+            android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+            android:paddingStart="10dp" android:paddingEnd="10dp" android:paddingBottom="10dp"
+            android:clipToPadding="false"/>
+    </LinearLayout>
+    <TextView android:id="@+id/tvMsg" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal" android:background="@drawable/card"
+        android:textColor="@color/err" android:textSize="14sp" android:paddingStart="18dp" android:paddingEnd="18dp"
+        android:paddingTop="10dp" android:paddingBottom="10dp" android:layout_marginBottom="26dp"
+        android:visibility="gone"/>
+</FrameLayout>

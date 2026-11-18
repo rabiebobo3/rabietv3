@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/bg">
+    <ScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_gravity="center" android:fillViewport="true">
+        <LinearLayout android:layout_width="360dp" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" android:orientation="vertical"
+            android:padding="24dp" android:layout_marginTop="40dp" android:layout_marginBottom="40dp"
+            android:background="@drawable/card" android:gravity="center">
+            <ImageView android:layout_width="96dp" android:layout_height="96dp"
+                android:src="@drawable/ic_app" android:contentDescription="RABIE TV"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="RABIE TV" android:textColor="@color/gold" android:textSize="30sp"
+                android:textStyle="bold" android:letterSpacing="0.14" android:layout_marginTop="14dp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="حساب المشترك" android:textColor="@color/textDim" android:textSize="14sp"
+                android:layout_marginTop="4dp"/>
+            <EditText android:id="@+id/edUser" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="اسم المستخدم" android:textColorHint="@color/textDim"
+                android:textColor="@color/text" android:background="@drawable/field"
+                android:padding="14dp" android:layout_marginTop="26dp" android:singleLine="true"/>
+            <EditText android:id="@+id/edPass" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="كلمة المرور" android:textColorHint="@color/textDim"
+                android:textColor="@color/text" android:background="@drawable/field"
+                android:padding="14dp" android:layout_marginTop="14dp" android:singleLine="true"
+                android:inputType="textPassword"/>
+            <TextView android:id="@+id/tvErr" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/err" android:textSize="14sp" android:layout_marginTop="12dp"
+                android:visibility="gone" android:gravity="center"/>
+            <Button android:id="@+id/btnGo" android:layout_width="match_parent" android:layout_height="52dp"
+                android:text="دخول" android:textColor="@color/bg" android:textSize="17sp" android:textStyle="bold"
+                android:background="@drawable/btn_gold" android:layout_marginTop="20dp"
+                android:stateListAnimator="@null"/>
+            <TextView android:id="@+id/tvVer" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textColor="@color/textDim" android:textSize="11sp" android:layout_marginTop="16dp"/>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>
