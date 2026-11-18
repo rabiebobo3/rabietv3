@@ -7,8 +7,8 @@ android {
         applicationId = "com.rabie.tv3"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0-m1"
+        versionCode = 2
+        versionName = "1.0-m1b"
     }
     signingConfigs {
         create("tv3") {

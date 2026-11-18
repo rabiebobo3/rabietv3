@@ -36,6 +36,11 @@ object Fs {
         try { if (t == null) return null; val s = t.trim(); if (s.isEmpty() || s == "null") return null; return JSONObject(s) } catch (e: Exception) { return null }
     }
 
+    /** ترميز مسار آمن للقاعدة — الفراغ %20 (محيط: server 4) ماشي + */
+    fun pathEnc(s: String): String {
+        try { return java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20") } catch (e: Exception) { return s }
+    }
+
     /** قيمة نصية آمنة من JSONObject */
     fun s(o: JSONObject?, k: String): String {
         try { if (o == null || !o.has(k) || o.isNull(k)) return ""; return o.getString(k).trim() } catch (e: Exception) { return "" }

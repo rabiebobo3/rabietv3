@@ -3,15 +3,13 @@ package com.rabie.tv3
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import org.json.JSONObject
 import java.util.UUID
 
-/** شاشة الدخول — حساب المشترك من لوحة RABIE TV */
+/** شاشة الدخول — حساب المشترك من لوحة RABIE TV — ثابتة ما كتتحركش، ومن غير حلقة رجوع */
 class LoginActivity : Activity() {
 
     private lateinit var edUser: EditText
@@ -20,6 +18,8 @@ class LoginActivity : Activity() {
     private lateinit var btnGo: Button
     private val prefs by lazy { getSharedPreferences("tv3", MODE_PRIVATE) }
     private var busy = false
+    /** منع إعادة المحاولة الصامتة داخل نفس الشاشة (لا حلقة) */
+    private var silentTried = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,11 +27,13 @@ class LoginActivity : Activity() {
         edUser = findViewById(R.id.edUser); edPass = findViewById(R.id.edPass)
         tvErr = findViewById(R.id.tvErr); btnGo = findViewById(R.id.btnGo)
         findViewById<TextView>(R.id.tvVer).text = "v" + versionName() + " · RABIE TV"
-        // جلسة محفوظة → تحقق صامت سريع
+        edUser.requestFocus()
+        // جلسة محفوظة → تحقق صامت واحد فقط
         val su = prefs.getString("username", "") ?: ""
         val sp = prefs.getString("password", "") ?: ""
-        if (!su.isEmpty() && !sp.isEmpty()) {
-            tvErr.text = "جاري التحقق من الحساب..."; tvErr.visibility = TextView.VISIBLE; tvErr.setTextColor(getColor(R.color.textDim))
+        if (!su.isEmpty() && !sp.isEmpty() && !silentTried) {
+            silentTried = true
+            msg("جاري التحقق من الحساب...", false)
             login(su, sp, true)
         }
         btnGo.setOnClickListener { doLogin() }
@@ -46,50 +48,65 @@ class LoginActivity : Activity() {
         login(edUser.text.toString().trim(), edPass.text.toString().trim(), false)
     }
 
-    private fun showErr(m: String, isErr: Boolean = true) {
-        tvErr.text = m
-        tvErr.setTextColor(resources.getColor(if (isErr) R.color.err else R.color.textDim))
-        tvErr.visibility = TextView.VISIBLE
+    /** رسالة ثابتة في خانتها — بلا أي حركة في الشاشة */
+    private fun msg(m: String, isErr: Boolean = true) {
+        try {
+            tvErr.text = m
+            tvErr.setTextColor(resources.getColor(if (isErr) R.color.err else R.color.textDim))
+        } catch (e: Exception) {}
     }
 
     private fun login(user: String, pass: String, silent: Boolean) {
-        if (user.isEmpty() || pass.isEmpty()) { if (!silent) showErr("أدخل اسم المستخدم وكلمة المرور"); return }
+        if (user.isEmpty() || pass.isEmpty()) { if (!silent) msg("أدخل اسم المستخدم وكلمة المرور"); return }
         busy = true
         Thread {
-            val body = Fs.get("/users/" + java.net.URLEncoder.encode(user, "UTF-8"))
+            val body = Fs.get("/users/" + Fs.pathEnc(user))
             val o = Fs.obj(body)
             runOnUiThread {
                 busy = false
                 if (o == null) {
-                    if (!silent) showErr("اسم المستخدم غير موجود أو تعذر الاتصال")
-                    else showErr("تعذر التحقق — أدخل الحساب من جديد")
+                    if (!silent) msg("تعذر الاتصال باللوحة أو الحساب غير موجود — أعد المحاولة")
+                    else msg("تعذر التحقق — سجل الحساب من جديد")
                     return@runOnUiThread
                 }
                 val dbPass = Fs.s(o, "password")
                 val blocked = Fs.s(o, "blocked").toLowerCase()
                 val expiry = Fs.s(o, "expiry")
                 val serverId = Fs.s(o, "server_id")
-                if (dbPass.isEmpty()) { showErr("كلمة المرور غير معرفة في اللوحة"); return@runOnUiThread }
-                if (dbPass != pass) { if (!silent) showErr("كلمة المرور غير صحيحة"); else showErr("🔁 تم تغيير كلمة المرور — سجّل من جديد"); return@runOnUiThread }
-                if (blocked == "true" || blocked == "1") { showErr("الحساب محظور — تواصل مع الإدارة"); return@runOnUiThread }
-                if (!Fs.expiryOk(expiry)) { showErr("انتهى الاشتراك بتاريخ " + expiry + " — تواصل مع الإدارة"); return@runOnUiThread }
+                if (dbPass.isEmpty()) { msg("كلمة المرور غير معرفة في اللوحة"); return@runOnUiThread }
+                if (dbPass != pass) { if (!silent) msg("كلمة المرور غير صحيحة"); else msg("🔁 تم تغيير كلمة المرور — سجّل من جديد"); return@runOnUiThread }
+                if (blocked == "true" || blocked == "1") { msg("الحساب محظور — تواصل مع الإدارة"); return@runOnUiThread }
+                if (!Fs.expiryOk(expiry)) { msg("انتهى الاشتراك بتاريخ " + expiry + " — تواصل مع الإدارة"); return@runOnUiThread }
+                // جلب السيرفر المرتبط بالحساب — بنفس مرونة اللوحة (ids بأرقام، بـ server، وحتى بفراغ)
+                val srvJson = resolveServer(serverId)
+                if (srvJson.isEmpty()) {
+                    msg("الحساب مربوط بسيرفر غير موجود في اللوحة — تواصل مع الإدارة")
+                    return@runOnUiThread
+                }
                 // منع مشاركة الحساب: رمز جلسة جديد يبطل القديمة
                 val token = UUID.randomUUID().toString()
-                Thread { Fs.http("PUT", "/sessions/" + java.net.URLEncoder.encode(user, "UTF-8"), JSONObject().put("token", token).toString()) }.start()
+                Thread { Fs.http("PUT", "/sessions/" + Fs.pathEnc(user), JSONObject().put("token", token).toString()) }.start()
                 prefs.edit().putString("username", user).putString("password", pass)
-                    .putString("expiry", expiry).putString("token", token).apply()
-                // جلب السيرفر المرتبط بالحساب
-                var srvJson = ""
-                if (serverId.isNotEmpty()) {
-                    val sb = Fs.get("/servers/" + java.net.URLEncoder.encode(serverId, "UTF-8"))
-                    val so = Fs.obj(sb)
-                    if (so != null) srvJson = buildServerJson(so, serverId)
-                }
-                prefs.edit().putString("server", srvJson).apply()
+                    .putString("expiry", expiry).putString("token", token)
+                    .putString("server", srvJson).apply()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             }
         }.start()
+    }
+
+    /** servers/{sid} ثم servers/server{sid} ثم servers/server {sid} — فشل الكل = إبقاء المستخدم هنا بلا حلقة */
+    private fun resolveServer(sid: String): String {
+        if (sid.isEmpty()) return ""
+        val s1 = Fs.obj(Fs.get("/servers/" + Fs.pathEnc(sid)))
+        if (s1 != null) return buildServerJson(s1, sid)
+        if (sid.matches(Regex("\\d+"))) {
+            val s2 = Fs.obj(Fs.get("/servers/" + Fs.pathEnc("server" + sid)))
+            if (s2 != null) return buildServerJson(s2, "server" + sid)
+            val s3 = Fs.obj(Fs.get("/servers/" + Fs.pathEnc("server " + sid)))
+            if (s3 != null) return buildServerJson(s3, "server " + sid)
+        }
+        return ""
     }
 
     /** servers/{id} → JSON سيرفر موحد (نفس بروتوكول اللوحة المفتوح) */
